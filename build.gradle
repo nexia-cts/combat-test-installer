@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id "com.github.johnrengelman.shadow" version "7.0.0"
+    id "de.undercouch.download" version "4.1.2"
+}
+
+group = 'com.nexia'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    implementation ('org.sharegov:mjson:1.4.1') {
+        transitive false
+    }
+}
+
+shadowJar {
+    manifest {
+        attributes 'Implementation-Title': 'CombatTestInstaller',
+                'Implementation-Version': project.version,
+                'Main-Class': 'com.nexia.installer.Main'
+    }
+
+    minimize()
+    archiveClassifier.set(null)
+    exclude('icon.ico')
+}
+
+build.dependsOn shadowJar
+test {
+    useJUnitPlatform()
+}
