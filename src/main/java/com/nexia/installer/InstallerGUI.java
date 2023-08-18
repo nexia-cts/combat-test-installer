@@ -1,64 +1,63 @@
 package com.nexia.installer;
 
-import com.nexia.installer.util.InstallerUtils;
+import com.nexia.installer.util.InstallerHelper;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
+import java.io.File;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public class InstallerGUI extends JFrame implements ActionListener {
+public class InstallerGUI extends JFrame {
     public static InstallerGUI instance;
-    private JLabel infoLabel;
 
-    private JLabel titleLabel;
-    private JFrame frame;
-    private JPanel panel;
+    private InstallerHelper helper = new InstallerHelper();
 
     public InstallerGUI() {
-        frame = new JFrame();
-        panel = new JPanel();
+        JPanel panel = helper.setPanel(this);
 
-        infoLabel = new JLabel(Main.BUNDLE.getString("installer.info"));
-        titleLabel = new JLabel(Main.BUNDLE.getString("installer.title"));
-        titleLabel.setHorizontalTextPosition(JLabel.TOP);
-        titleLabel.setVerticalTextPosition(JLabel.TOP);
-        infoLabel.setHorizontalTextPosition(JLabel.CENTER);
-        infoLabel.setVerticalTextPosition(JLabel.CENTER);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        JButton button = new JButton(Main.BUNDLE.getString("installer.button.install"));
-
-        button.addActionListener(this);
-
-        //panel.setBorder(BorderFactory.createEmptyBorder(100, 30, 10, 315));
-        panel.setPreferredSize(new Dimension(315, 250));
-        //panel.setLayout(new FlowLayout(FlowLayout.CENTER,10,10));
-
-        panel.add(titleLabel);
-        panel.add(infoLabel);
-
-        panel.add(button);
-
-
-        frame.add(panel, BorderLayout.CENTER);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
-        frame.setTitle(Main.BUNDLE.getString("installer.title"));
-        frame.pack();
-        frame.setIconImage(Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png")));
-        frame.setVisible(true);
-
+        add(panel);
         instance = this;
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        try {
-            InstallerUtils.installTest();
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
+    public static void selectInstallLocation(Supplier<String> initalDir, Consumer<String> selectedDir) {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setCurrentDirectory(new File(initalDir.get()));
+        chooser.setDialogTitle(Main.BUNDLE.getString("installer.prompt.select.location"));
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setAcceptAllFileFilterUsed(false);
+
+        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            selectedDir.accept(chooser.getSelectedFile().getAbsolutePath());
+        }
+    }
+
+
+    public static void load() throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        String lafCls = UIManager.getSystemLookAndFeelClassName();
+        UIManager.setLookAndFeel(lafCls);
+
+        if (lafCls.endsWith("AquaLookAndFeel")) {
+            UIManager.put("TabbedPane.foreground", Color.BLACK);
         }
 
+        InstallerGUI gui = new InstallerGUI();
+        gui.updateSize(true);
+        gui.setTitle(Main.BUNDLE.getString("installer.title"));
+        gui.setIconImage(Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png")));
+        gui.setLocationRelativeTo(null);
+        gui.setVisible(true);
+    }
+
+    public void updateSize(boolean updateMinimum) {
+        if (updateMinimum) setMinimumSize(null);
+        setPreferredSize(null);
+        pack();
+        Dimension size = getPreferredSize();
+        if (updateMinimum) setMinimumSize(size);
+        setPreferredSize(new Dimension(Math.max(450, size.width), size.height));
+        setSize(getPreferredSize());
     }
 }

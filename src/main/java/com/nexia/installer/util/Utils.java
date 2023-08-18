@@ -1,23 +1,60 @@
 package com.nexia.installer.util;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
-public class WebUtils {
+public class Utils {
+
+    public static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
     public static String readString(URL url) throws IOException {
         try (InputStream is = openUrl(url)) {
             return readString(is);
         }
+    }
+
+    public static File extractZip(Path file, Path path) throws IOException {
+        ZipInputStream zipIn = new ZipInputStream(Files.newInputStream(Paths.get(file.toString())));
+        ZipEntry entry = zipIn.getNextEntry();
+        String filePath = "";
+        // iterates over entries in the zip file
+        while (entry != null) {
+            filePath = path + File.separator + entry.getName();
+            if (!entry.isDirectory()) {
+                BufferedOutputStream bos = new BufferedOutputStream(Files.newOutputStream(Paths.get(filePath)));
+                byte[] bytesIn = new byte[8096];
+                int read;
+                while ((read = zipIn.read(bytesIn)) != -1) {
+                    bos.write(bytesIn, 0, read);
+                }
+                bos.close();
+            } else {
+                // if the entry is a directory, make the directory
+                File dir = new File(filePath);
+                dir.mkdirs();
+            }
+            zipIn.closeEntry();
+            entry = zipIn.getNextEntry();
+        }
+        zipIn.close();
+        return new File(filePath);
+    }
+
+    public static String readString(Path path) throws IOException {
+        return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
     }
 
     public static String readString(InputStream is) throws IOException {
