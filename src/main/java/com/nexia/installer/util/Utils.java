@@ -20,13 +20,8 @@ import java.util.zip.ZipInputStream;
 public class Utils {
 
     public static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-    public static String readString(URL url) throws IOException {
-        try (InputStream is = openUrl(url)) {
-            return readString(is);
-        }
-    }
 
-    public static File extractZip(Path file, Path path) throws IOException {
+    public static void extractZip(Path file, Path path) throws IOException {
         ZipInputStream zipIn = new ZipInputStream(Files.newInputStream(Paths.get(file.toString())));
         ZipEntry entry = zipIn.getNextEntry();
         String filePath = "";
@@ -50,31 +45,10 @@ public class Utils {
             entry = zipIn.getNextEntry();
         }
         zipIn.close();
-        return new File(filePath);
     }
 
     public static String readString(Path path) throws IOException {
         return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
-    }
-
-    public static String readString(InputStream is) throws IOException {
-        byte[] data = new byte[Math.max(1000, is.available())];
-        int offset = 0;
-        int len;
-
-        while ((len = is.read(data, offset, data.length - offset)) >= 0) {
-            offset += len;
-
-            if (offset == data.length) {
-                int next = is.read();
-                if (next < 0) break;
-
-                data = Arrays.copyOf(data, data.length * 2);
-                data[offset++] = (byte) next;
-            }
-        }
-
-        return new String(data, 0, offset, StandardCharsets.UTF_8);
     }
 
     public static void writeToFile(Path path, String string) throws IOException {

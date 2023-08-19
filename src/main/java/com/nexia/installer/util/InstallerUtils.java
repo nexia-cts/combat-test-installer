@@ -4,18 +4,17 @@ import com.nexia.installer.Main;
 import com.nexia.installer.game.VersionHandler;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.FileAttributeView;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
+import java.text.MessageFormat;
 import java.util.List;
-import java.util.Set;
 
 public class InstallerUtils {
     public static Path findDefaultInstallDir() {
@@ -73,20 +72,31 @@ public class InstallerUtils {
 
                String alternativeCodeName = gameVersion.getCodeName().replaceAll("\\.", "_");
 
-               Path versionsDir = mcDir.resolve("versions");
-               Path profileDir = versionsDir.resolve(alternativeCodeName);
-               Path profileJson = profileDir.resolve(alternativeCodeName + ".json");
+               System.out.println("Installing " + gameVersion.getVersion() + " (" + gameVersion.getCodeName() + ")");
 
-               if (!Files.exists(profileDir)) {
-                   Files.createDirectory(profileDir);
-                   Files.createFile(profileJson);
-               }
+               Path versionsDir = mcDir.resolve("versions");
+               Path profileDir = versionsDir.resolve(gameVersion.getCodeName());
+               Path profileJson = profileDir.resolve(gameVersion.getCodeName() + ".json");
+
+               Path aProfileDir = versionsDir.resolve(alternativeCodeName);
+               Path aProfileJson = aProfileDir.resolve(alternativeCodeName + ".json");
+
+               if(!Files.exists(profileDir)) Files.createDirectory(profileDir);
+               if(!Files.exists(profileJson)) Files.createFile(profileJson);
+
+               if(!Files.exists(aProfileDir)) Files.createDirectory(aProfileDir);
+               if(!Files.exists(aProfileJson)) Files.createFile(aProfileJson);
 
                File zipFile = new File(versionsDir + "/" + gameVersion.getCodeName() + ".zip");
 
                Utils.downloadFile(URI.create(gameVersion.getDownload().url).toURL(), zipFile.toPath());
                Utils.extractZip(zipFile.toPath(), versionsDir);
 
+               Files.copy(aProfileJson, profileJson, StandardCopyOption.REPLACE_EXISTING);
+
+
+               aProfileJson.toFile().delete();
+               aProfileDir.toFile().delete();
                zipFile.delete();
 
                if (InstallerHelper.createProfile.isSelected()) {
@@ -96,6 +106,7 @@ public class InstallerUtils {
 
                    profileInstaller.setupProfile(gameVersion.getCodeName(), gameVersion.getVersion(), launcherType);
                }
+               showDone(gameVersion);
            } catch (Exception e) {
                e.printStackTrace();
            } finally {
@@ -122,5 +133,20 @@ public class InstallerUtils {
         }
 
         return result == JOptionPane.YES_OPTION ? ProfileInstaller.LauncherType.MICROSOFT_STORE : ProfileInstaller.LauncherType.WIN32;
+    }
+
+    private static void showDone(VersionHandler.GameVersion gameVersion) throws URISyntaxException, IOException {
+        Object[] options = {"OK", "Install Fabric"};
+        int result = JOptionPane.showOptionDialog(null,
+                MessageFormat.format(Main.BUNDLE.getString("installer.prompt.install.done"), gameVersion.getVersion()),
+                Main.BUNDLE.getString("installer.title"),
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
+
+        if(result == JOptionPane.NO_OPTION && Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) Desktop.getDesktop().browse(new URI("https://github.com/rizecookey/fabric-installer/releases"));
     }
 }

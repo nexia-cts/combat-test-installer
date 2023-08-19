@@ -11,9 +11,8 @@ import java.util.function.Supplier;
 public class InstallerGUI extends JFrame {
     public static InstallerGUI instance;
 
-    private InstallerHelper helper = new InstallerHelper();
-
     public InstallerGUI() {
+        InstallerHelper helper = new InstallerHelper();
         JPanel panel = helper.setPanel(this);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -46,7 +45,7 @@ public class InstallerGUI extends JFrame {
         InstallerGUI gui = new InstallerGUI();
         gui.updateSize(true);
         gui.setTitle(Main.BUNDLE.getString("installer.title"));
-        gui.setIconImage(Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png")));
+        gui.setIconImage(Main.icon);
         gui.setLocationRelativeTo(null);
         gui.setVisible(true);
     }

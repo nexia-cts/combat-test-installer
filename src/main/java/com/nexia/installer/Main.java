@@ -1,6 +1,7 @@
 package com.nexia.installer;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,6 +13,8 @@ import java.util.ResourceBundle;
 public class Main {
 
     public static OS os = null;
+
+    public static Image icon;
 
     public static final ResourceBundle BUNDLE = ResourceBundle.getBundle("lang/installer", Locale.getDefault(), new ResourceBundle.Control() {
         @Override
@@ -44,6 +47,7 @@ public class Main {
         if(System.getProperty("os.name").startsWith("mac"))
             os = OS.MAC;
 
+        icon = Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png"));
         InstallerGUI.load();
     }
 

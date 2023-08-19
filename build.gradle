@@ -1,21 +1,20 @@
 plugins {
     id 'java'
-    id 'maven-publish'
     id "com.github.johnrengelman.shadow" version "7.0.0"
     id "de.undercouch.download" version "4.1.2"
 }
 
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
 group = 'com.nexia'
-version = '1.0-SNAPSHOT'
+version = '1.0.0'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.9.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-
     implementation ('org.sharegov:mjson:1.4.1') {
         transitive false
     }
@@ -34,8 +33,3 @@ shadowJar {
 }
 
 build.dependsOn shadowJar
-test {
-    useJUnitPlatform()
-}
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11

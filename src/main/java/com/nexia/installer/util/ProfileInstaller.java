@@ -58,16 +58,14 @@ public class ProfileInstaller {
             jsonObject.set("profiles", profiles);
         }
 
-        String profileName = "pending " + name;
-
-        Json profile = profiles.at(profileName);
+        Json profile = profiles.at(name);
 
         if (profile == null) {
             profile = createProfile(gameVersion);
-            profiles.set(profileName, profile);
+            profiles.set(name, profile);
         }
 
-        profile.set("lastVersionId", profileName);
+        profile.set("lastVersionId", name);
 
         Utils.writeToFile(launcherProfiles, jsonObject.toString());
     }
