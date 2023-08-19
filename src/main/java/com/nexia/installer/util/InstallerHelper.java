@@ -19,12 +19,10 @@ public class InstallerHelper {
     public JTextField installLocation;
     public JButton selectFolderButton;
 
-    private JPanel panel;
-
     public static JCheckBox createProfile;
 
     public JPanel setPanel(InstallerGUI gui) {
-        panel = new JPanel(new GridBagLayout());
+        JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(new EmptyBorder(4, 4, 4, 4));
 
         GridBagConstraints c = new GridBagConstraints();
@@ -52,7 +50,7 @@ public class InstallerHelper {
 
         installLocation.setText(InstallerUtils.findDefaultInstallDir().toString());
 
-        addLastRow(panel, c, null,
+        addLastRow(panel, c,
                 buttonInstall = new JButton(Main.BUNDLE.getString("installer.button.install")));
         buttonInstall.addActionListener(e -> {
             buttonInstall.setEnabled(false);
@@ -73,8 +71,8 @@ public class InstallerHelper {
         addRow(parent, c, false, label, components);
     }
 
-    protected void addLastRow(Container parent, GridBagConstraints c, String label, Component... components) {
-        addRow(parent, c, true, label, components);
+    protected void addLastRow(Container parent, GridBagConstraints c, Component... components) {
+        addRow(parent, c, true, null, components);
     }
 
     public void addRow(Container parent, GridBagConstraints c, boolean last, String label, Component... components) {
