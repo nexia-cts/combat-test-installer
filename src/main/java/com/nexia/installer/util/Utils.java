@@ -12,6 +12,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -119,5 +121,24 @@ public class Utils {
         }
 
         return output.toString();
+    }
+
+    public static String getProfileIcon() {
+        try (InputStream is = Utils.class.getClassLoader().getResourceAsStream("icon.png")) {
+            byte[] ret = new byte[4096];
+            int offset = 0;
+            int len;
+
+            while ((len = is.read(ret, offset, ret.length - offset)) != -1) {
+                offset += len;
+                if (offset == ret.length) ret = Arrays.copyOf(ret, ret.length * 2);
+            }
+
+            return "data:image/png;base64," + Base64.getEncoder().encodeToString(Arrays.copyOf(ret, offset));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return "furnace"; // Fallback to furnace icon if we cant load CTS icon.
     }
 }
