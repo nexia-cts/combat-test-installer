@@ -76,7 +76,7 @@ public class ProfileInstaller {
         jsonObject.set("type", "custom");
         jsonObject.set("created", Utils.ISO_8601.format(new Date()));
         jsonObject.set("lastUsed", Utils.ISO_8601.format(new Date()));
-        jsonObject.set("icon", "furnace");
+        jsonObject.set("icon", Utils.getProfileIcon());
         return jsonObject;
     }
 
