@@ -1,6 +1,7 @@
 package com.nexia.installer;
 
 import com.nexia.installer.util.InstallerHelper;
+import com.nexia.installer.util.fabric.FabricInstallerHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,13 +12,18 @@ import java.util.function.Supplier;
 public class InstallerGUI extends JFrame {
     public static InstallerGUI instance;
 
+    public JPanel vanilla;
+
+    public JPanel fabric;
+
+    public JTabbedPane pane;
+
     public InstallerGUI() {
-        InstallerHelper helper = new InstallerHelper();
-        JPanel panel = helper.setPanel(this);
+        this.vanilla = new InstallerHelper().setPanel(this);
+        this.fabric = new FabricInstallerHelper().setPanel(this);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        add(panel);
         instance = this;
     }
 
@@ -43,6 +49,15 @@ public class InstallerGUI extends JFrame {
         }
 
         InstallerGUI gui = new InstallerGUI();
+
+        gui.pane = new JTabbedPane(JTabbedPane.TOP);
+
+        gui.pane.addTab(Main.BUNDLE.getString("installer.tab.vanilla"), gui.vanilla);
+        gui.pane.addTab(Main.BUNDLE.getString("installer.tab.fabric"), gui.fabric);
+
+        gui.setContentPane(gui.pane);
+
+
         gui.updateSize(true);
         gui.setTitle(Main.BUNDLE.getString("installer.title"));
         gui.setIconImage(Main.icon);
@@ -50,7 +65,7 @@ public class InstallerGUI extends JFrame {
         gui.setVisible(true);
     }
 
-    public void updateSize(boolean updateMinimum) {
+    private void updateSize(boolean updateMinimum) {
         if (updateMinimum) setMinimumSize(null);
         setPreferredSize(null);
         pack();

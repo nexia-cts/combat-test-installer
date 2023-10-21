@@ -1,14 +1,12 @@
 package com.nexia.installer.util;
 
+import com.nexia.installer.InstallerGUI;
 import com.nexia.installer.Main;
 import com.nexia.installer.game.VersionHandler;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -115,7 +113,7 @@ public class InstallerUtils {
         }).start();
     }
 
-    private static ProfileInstaller.LauncherType showLauncherTypeSelection() {
+    public static ProfileInstaller.LauncherType showLauncherTypeSelection() {
         Object[] options = { Main.BUNDLE.getString("installer.prompt.launcher.type.xbox"), Main.BUNDLE.getString("installer.prompt.launcher.type.win32")};
 
         int result = JOptionPane.showOptionDialog(null,
@@ -135,7 +133,7 @@ public class InstallerUtils {
         return result == JOptionPane.YES_OPTION ? ProfileInstaller.LauncherType.MICROSOFT_STORE : ProfileInstaller.LauncherType.WIN32;
     }
 
-    private static void showDone(VersionHandler.GameVersion gameVersion) throws URISyntaxException, IOException {
+    private static void showDone(VersionHandler.GameVersion gameVersion) {
         Object[] options = {"OK", "Install Fabric"};
         int result = JOptionPane.showOptionDialog(null,
                 MessageFormat.format(Main.BUNDLE.getString("installer.prompt.install.done"), gameVersion.getVersion()),
@@ -147,6 +145,6 @@ public class InstallerUtils {
                 options[0]
         );
 
-        if(result == JOptionPane.NO_OPTION && Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) Desktop.getDesktop().browse(new URI("https://github.com/rizecookey/fabric-installer/releases"));
+        if(result == JOptionPane.NO_OPTION) InstallerGUI.instance.pane.setSelectedComponent(InstallerGUI.instance.fabric);
     }
 }

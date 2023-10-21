@@ -81,13 +81,17 @@ public class ProfileInstaller {
     }
 
     public enum LauncherType {
-        WIN32("launcher_profiles.json"),
-        MICROSOFT_STORE("launcher_profiles_microsoft_store.json");
+        WIN32("win32", "launcher_profiles.json"),
+        MICROSOFT_STORE("microsoft_store", "launcher_profiles_microsoft_store.json");
 
         public final String profileJsonName;
 
-        LauncherType(String profileJsonName) {
+        public final String name;
+
+        LauncherType(String name, String profileJsonName) {
+            this.name = name;
             this.profileJsonName = profileJsonName;
         }
+
     }
 }
