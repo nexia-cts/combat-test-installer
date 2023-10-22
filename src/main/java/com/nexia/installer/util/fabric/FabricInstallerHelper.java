@@ -2,14 +2,13 @@ package com.nexia.installer.util.fabric;
 
 import com.nexia.installer.InstallerGUI;
 import com.nexia.installer.Main;
-import com.nexia.installer.util.InstallerHelper;
-import com.nexia.installer.util.InstallerUtils;
-import com.nexia.installer.util.ProfileInstaller;
-import com.nexia.installer.util.Utils;
+import com.nexia.installer.util.*;
+import mjson.Json;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -80,13 +79,6 @@ public class FabricInstallerHelper extends InstallerHelper {
                 }
                 buttonFabric.setEnabled(true);
             } catch (IOException ex) {
-                try {
-                    getJarFile().delete();
-                } catch (IOException exc) {
-                    // what the fuck
-                    exc.printStackTrace();
-                }
-
                 buttonFabric.setEnabled(false);
             }
         });
@@ -130,21 +122,38 @@ public class FabricInstallerHelper extends InstallerHelper {
         }
 
         System.out.println("Installing Fabric " + gameVersion.getVersion() + " (" + gameVersion.getCodeName() + ")");
-
-
-        // help - Opens this menu
-        //client -dir <install dir> -mcversion <minecraft version, default latest> -loader <loader version, default latest> -launcher [win32, microsoft_store]
-        //server -dir <install dir, default current dir> -mcversion <minecraft version, default latest> -loader <loader version, default latest> -downloadMinecraft
-
         String[] cmd2 = new String[]{"java", "-jar", "cache/" + getJarFile().getName(), "client", "-dir" + "\"" + mcPath.toAbsolutePath() + "\"", "-mcversion", gameVersion.codeName, launcherThing};
 
 
-        Process process = Runtime.getRuntime().exec(cmd2);
-        // instead of checking if is done, ykyk
-        // lets just show them its already done!
-        // who would notice!!!
+        try {
+            Process process = Runtime.getRuntime().exec(cmd2);
 
-        this.showDone(gameVersion);
+            BufferedInputStream successBufferedInputStream = new BufferedInputStream(process.getInputStream());
+            BufferedInputStream errorBufferedInputStream = new BufferedInputStream(process.getErrorStream());
+            synchronized (process) {
+                process.waitFor();
+            }
+
+            boolean hasError = false;
+
+            if (errorBufferedInputStream.available() != 0) {
+                errorBufferedInputStream.close();
+                hasError = true;
+            }
+
+            if (process.exitValue() != 0) hasError = true;
+            if (successBufferedInputStream.available() == 0) hasError = true;
+
+            if(hasError) {
+                this.error();
+            } else {
+                this.showDone(gameVersion);
+            }
+
+        } catch (Exception ignored) {
+            this.error();
+        }
+
         buttonInstall.setEnabled(true);
     }
 
@@ -160,7 +169,11 @@ public class FabricInstallerHelper extends InstallerHelper {
             Files.createDirectories(cacheDir);
             Utils.downloadFile(url, cacheDir.resolve(fileName));
             return new File(cacheDir.toFile(), fileName);
+        }
 
+        if(cacheDir.toFile().listFiles().length == 0) {
+            Files.delete(cacheDir);
+            return getJarFile();
         }
 
         for(File file : cacheDir.toFile().listFiles()) {
@@ -168,7 +181,6 @@ public class FabricInstallerHelper extends InstallerHelper {
                 return file;
             } else {
                 file.delete();
-                Files.createDirectory(cacheDir);
                 Utils.downloadFile(url, cacheDir.resolve(fileName));
                 return new File(cacheDir.toFile(), fileName);
             }
@@ -178,7 +190,18 @@ public class FabricInstallerHelper extends InstallerHelper {
     }
 
     private String getFabricVersion() {
-        return "0.11.1";
+
+        String version = "0.11.1";
+
+        try {
+            String response = HttpAPI.get("https://api.github.com/repos/rizecookey/fabric-installer/releases/latest");
+            Json jsonObject = Json.read(response);
+            Json jsonVersion = jsonObject.at("tag_name");
+
+            if(jsonVersion == null || !jsonVersion.isString()) return version;
+
+            return jsonVersion.asString();
+        } catch (Exception ignored) { return version; }
     }
 
     private void showDone(FabricVersionHandler.GameVersion gameVersion) {
@@ -194,6 +217,30 @@ public class FabricInstallerHelper extends InstallerHelper {
         );
 
         if(result == JOptionPane.NO_OPTION) InstallerGUI.instance.pane.setSelectedComponent(InstallerGUI.instance.vanilla);
+    }
+
+    private void error() {
+        Object[] options = {"OK", "Cancel"};
+        int result = JOptionPane.showOptionDialog(null,
+                MessageFormat.format(Main.BUNDLE.getString("installer.prompt.install.error"), ""),
+                Main.BUNDLE.getString("installer.title"),
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.ERROR_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
+
+        if(result == JOptionPane.OK_OPTION) {
+            try {
+                InstallerGUI.instance.dispose();
+                Main.main(new String[]{});
+            } catch (Exception ignored) {
+                System.exit(0);
+            }
+        }
+
+        buttonInstall.setEnabled(true);
     }
 }
 
