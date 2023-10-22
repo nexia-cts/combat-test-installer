@@ -100,29 +100,8 @@ public class FabricInstallerHelper extends InstallerHelper {
             throw new RuntimeException(Main.BUNDLE.getString("installer.exception.no.launcher.directory"));
         }
 
-        final ProfileInstaller profileInstaller = new ProfileInstaller(mcPath);
-        ProfileInstaller.LauncherType launcherType;
-        String launcherThing = "";
-
-        // can you tell i have no fucking idea what im doing?
-        if(InstallerHelper.createProfile.isSelected()) {
-            List<ProfileInstaller.LauncherType> types = profileInstaller.getInstalledLauncherTypes();
-
-            if (types.isEmpty()) {
-                throw new RuntimeException(Main.BUNDLE.getString("installer.exception.no.launcher.profile"));
-            } else {
-                launcherType = InstallerUtils.showLauncherTypeSelection();
-
-                if (launcherType == null) {
-                    return;
-                }
-
-                launcherThing = "-launcher " + launcherType.name;
-            }
-        }
-
         System.out.println("Installing Fabric " + gameVersion.getVersion() + " (" + gameVersion.getCodeName() + ")");
-        String[] cmd2 = new String[]{"java", "-jar", "cache/" + getJarFile().getName(), "client", "-dir" + "\"" + mcPath.toAbsolutePath() + "\"", "-mcversion", gameVersion.codeName, launcherThing};
+        String[] cmd2 = new String[]{"java", "-jar", "cache/" + getJarFile().getName(), "client", "-dir" + "\"" + mcPath.toAbsolutePath() + "\"", "-mcversion", gameVersion.codeName};
 
 
         try {
