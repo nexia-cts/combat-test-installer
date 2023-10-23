@@ -55,7 +55,7 @@ public class InstallerHelper {
         buttonInstall.addActionListener(e -> {
             buttonInstall.setEnabled(false);
             try {
-                install();
+                launch();
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
@@ -107,7 +107,7 @@ public class InstallerHelper {
         c.gridx = 0;
     }
 
-    private void install() throws IOException {
+    public void launch() throws IOException {
 
         String stringGameVersion = (String) gameVersionComboBox.getSelectedItem();
         VersionHandler.GameVersion gameVersion = VersionHandler.identifyGameVersion(stringGameVersion);

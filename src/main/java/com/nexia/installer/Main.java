@@ -36,13 +36,12 @@ public class Main {
 
     public static void main(String[] args) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 
+        os = OS.LINUX;
+
         if(System.getProperty("os.name").startsWith("Windows")){
             os = OS.WINDOWS;
             System.setProperty("javax.net.ssl.trustStoreType", "WINDOWS-ROOT");
         }
-
-        if(System.getProperty("os.name").startsWith("lin"))
-            os = OS.LINUX;
 
         if(System.getProperty("os.name").startsWith("mac"))
             os = OS.MAC;

@@ -25,7 +25,7 @@ public class Utils {
     public static void extractZip(Path file, Path path) throws IOException {
         ZipInputStream zipIn = new ZipInputStream(Files.newInputStream(Paths.get(file.toString())));
         ZipEntry entry = zipIn.getNextEntry();
-        String filePath = "";
+        String filePath;
         // iterates over entries in the zip file
         while (entry != null) {
             filePath = path + File.separator + entry.getName();
@@ -136,9 +136,7 @@ public class Utils {
 
             return "data:image/png;base64," + Base64.getEncoder().encodeToString(Arrays.copyOf(ret, offset));
         } catch (IOException e) {
-            e.printStackTrace();
+            return "furnace"; // Fallback to furnace icon if we cant load Nexia icon.
         }
-
-        return "furnace"; // Fallback to furnace icon if we cant load CTS icon.
     }
 }
