@@ -136,7 +136,7 @@ public class Utils {
 
             return "data:image/png;base64," + Base64.getEncoder().encodeToString(Arrays.copyOf(ret, offset));
         } catch (IOException e) {
-            return "furnace"; // Fallback to furnace icon if we cant load Nexia icon.
+            return "furnace"; // Fallback to default icon if we cant load the icon.
         }
     }
 }

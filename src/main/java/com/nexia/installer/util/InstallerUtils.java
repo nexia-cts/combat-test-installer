@@ -133,6 +133,29 @@ public class InstallerUtils {
         return result == JOptionPane.YES_OPTION ? ProfileInstaller.LauncherType.MICROSOFT_STORE : ProfileInstaller.LauncherType.WIN32;
     }
 
+    public static void showError(String error) {
+        Object[] options = {"Restart Program"};
+        int result = JOptionPane.showOptionDialog(null,
+                error,
+                Main.BUNDLE.getString("installer.title"),
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.ERROR_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
+
+        if(result == JOptionPane.OK_OPTION) {
+            try {
+                InstallerGUI.instance.dispose();
+                Main.main(new String[]{});
+            } catch (Exception ignored) {
+                System.exit(0);
+            }
+        }
+
+    }
+
     private static void showDone(VersionHandler.GameVersion gameVersion) {
         Object[] options = {"OK", "Install Fabric"};
         int result = JOptionPane.showOptionDialog(null,
