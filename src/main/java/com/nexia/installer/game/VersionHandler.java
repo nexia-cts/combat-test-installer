@@ -10,7 +10,7 @@ public class VersionHandler {
 
     public static GameVersion CombatTest8b = new GameVersion("Combat Test 8b", "1.16_combat-5", new Download("9b2b984d635d373564b50803807225c75d7fd447", "https://launcher.mojang.com/experiments/combat/9b2b984d635d373564b50803807225c75d7fd447/1_16_combat-5.zip"));
 
-    public static GameVersion CombatTest8 = new GameVersion("Combat Test 8", "1.16_combat-4", new Download("b4306b421183bd084b2831bd8d33a5db05ae9f9c", "https://cdn.discordapp.com/attachments/369990015096455168/947864881028272198/1_16_combat-4.zip"));
+    public static GameVersion CombatTest8 = new GameVersion("Combat Test 8", "1.16_combat-4", new Download("b4306b421183bd084b2831bd8d33a5db05ae9f9c", "https://notcoded.needs.rest/r/1_16_combat-4.zip"));
 
     public static GameVersion CombatTest7c = new GameVersion("Combat Test 7c", "1.16_combat-3", new Download("2557b99d95588505e988886220779087d7d6b1e9", "https://piston-data.mojang.com/experiments/combat/2557b99d95588505e988886220779087d7d6b1e9/1_16_combat-3.zip"));
 
