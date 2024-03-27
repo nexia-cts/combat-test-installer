@@ -11,6 +11,8 @@ import java.awt.*;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -64,8 +66,9 @@ public class FabricInstallerHelper extends InstallerHelper {
             buttonInstall.setEnabled(false);
             try {
                 launch();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
+            } catch (IOException | RuntimeException ex) {
+                InstallerUtils.showError(ex.getMessage());
+                ex.printStackTrace();
             }
         });
 
@@ -124,13 +127,13 @@ public class FabricInstallerHelper extends InstallerHelper {
             if (successBufferedInputStream.available() == 0) hasError = true;
 
             if(hasError) {
-                this.error();
+                InstallerUtils.showError(Main.BUNDLE.getString("installer.prompt.install.error"));
             } else {
                 this.showDone(gameVersion);
             }
 
         } catch (Exception ignored) {
-            this.error();
+            InstallerUtils.showError(Main.BUNDLE.getString("installer.prompt.install.error"));
         }
 
         buttonInstall.setEnabled(true);
@@ -170,7 +173,7 @@ public class FabricInstallerHelper extends InstallerHelper {
 
     private String getFabricVersion() {
 
-        String version = "0.11.1";
+        String version = "1.0.0";
 
         try {
             String response = HttpAPI.get("https://api.github.com/repos/rizecookey/fabric-installer/releases/latest");
@@ -183,8 +186,8 @@ public class FabricInstallerHelper extends InstallerHelper {
         } catch (Exception ignored) { return version; }
     }
 
-    private void showDone(FabricVersionHandler.GameVersion gameVersion) {
-        Object[] options = {"OK", "Install Vanilla"};
+    private void showDone(FabricVersionHandler.GameVersion gameVersion) throws URISyntaxException, IOException {
+        Object[] options = {"OK", "View CTS Mod List"};
         int result = JOptionPane.showOptionDialog(null,
                 MessageFormat.format(Main.BUNDLE.getString("installer.prompt.install.done.fabric"), gameVersion.getVersion()),
                 Main.BUNDLE.getString("installer.title"),
@@ -195,31 +198,14 @@ public class FabricInstallerHelper extends InstallerHelper {
                 options[0]
         );
 
-        if(result == JOptionPane.NO_OPTION) InstallerGUI.instance.pane.setSelectedComponent(InstallerGUI.instance.vanilla);
-    }
-
-    private void error() {
-        Object[] options = {"OK", "Cancel"};
-        int result = JOptionPane.showOptionDialog(null,
-                MessageFormat.format(Main.BUNDLE.getString("installer.prompt.install.error"), ""),
-                Main.BUNDLE.getString("installer.title"),
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.ERROR_MESSAGE,
-                null,
-                options,
-                options[0]
-        );
-
-        if(result == JOptionPane.OK_OPTION) {
-            try {
-                InstallerGUI.instance.dispose();
-                Main.main(new String[]{});
-            } catch (Exception ignored) {
-                System.exit(0);
+        if(result == JOptionPane.NO_OPTION) {
+            URI url = new URI("https://github.com/nexia-cts/cts-mod-list");
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(url);
+            } else {
+                throw new UnsupportedOperationException("Failed to open " + url.toURL());
             }
         }
-
-        buttonInstall.setEnabled(true);
     }
 }
 

@@ -6,6 +6,7 @@ import com.nexia.installer.util.fabric.FabricInstallerHelper;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -57,12 +58,27 @@ public class InstallerGUI extends JFrame {
 
         gui.setContentPane(gui.pane);
 
-
         gui.updateSize(true);
         gui.setTitle(Main.BUNDLE.getString("installer.title"));
+
         gui.setIconImage(Main.icon);
+        gui.setTaskBarImage(Main.icon);
+
         gui.setLocationRelativeTo(null);
         gui.setVisible(true);
+    }
+
+    private void setTaskBarImage(Image image) {
+        try {
+            // Only supported in Java 9 +
+            Class<?> taskbarClass = Class.forName("java.awt.Taskbar");
+            Method getTaskbar = taskbarClass.getDeclaredMethod("getTaskbar");
+            Method setIconImage = taskbarClass.getDeclaredMethod("setIconImage", Image.class);
+            Object taskbar = getTaskbar.invoke(null);
+            setIconImage.invoke(taskbar, image);
+        } catch (Exception e) {
+            // Ignored, running on Java 8
+        }
     }
 
     private void updateSize(boolean updateMinimum) {

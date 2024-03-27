@@ -56,8 +56,9 @@ public class InstallerHelper {
             buttonInstall.setEnabled(false);
             try {
                 launch();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
+            } catch (IOException | RuntimeException ex) {
+                InstallerUtils.showError(ex.getMessage());
+                ex.printStackTrace();
             }
         });
 

@@ -22,6 +22,8 @@ public class Utils {
 
     public static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
+    public static String userAgent = "Mozilla/5.0 (compatible; combat-test-installer; +https://github.com/nexia-cts/combat-test-installer)";
+
     public static void extractZip(Path file, Path path) throws IOException {
         ZipInputStream zipIn = new ZipInputStream(Files.newInputStream(Paths.get(file.toString())));
         ZipEntry entry = zipIn.getNextEntry();
@@ -56,7 +58,7 @@ public class Utils {
         Files.write(path, string.getBytes(StandardCharsets.UTF_8));
     }
 
-    public static void downloadFile(URL url, Path path) throws IOException {
+    public static void downloadFile(URL url, Path path) {
         try (InputStream in = openUrl(url)) {
             Files.createDirectories(path.getParent());
             Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
@@ -67,7 +69,8 @@ public class Utils {
                 t.addSuppressed(t2);
             }
 
-            throw t;
+            InstallerUtils.showError(t.getMessage());
+            t.printStackTrace();
         }
     }
 
@@ -76,6 +79,7 @@ public class Utils {
     private static InputStream openUrl(URL url) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
+        conn.setRequestProperty("User-Agent", userAgent);
         conn.setConnectTimeout(HTTP_TIMEOUT_MS);
         conn.setReadTimeout(HTTP_TIMEOUT_MS);
         conn.connect();
@@ -136,7 +140,7 @@ public class Utils {
 
             return "data:image/png;base64," + Base64.getEncoder().encodeToString(Arrays.copyOf(ret, offset));
         } catch (IOException e) {
-            return "furnace"; // Fallback to furnace icon if we cant load Nexia icon.
+            return "furnace"; // Fallback to default icon if we cant load the icon.
         }
     }
 }
