@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Objects;
 
 public class FabricInstallerHelper extends InstallerHelper {
     public static JButton buttonInstall;
@@ -52,6 +53,7 @@ public class FabricInstallerHelper extends InstallerHelper {
                 installLocation = new JTextField(20),
                 selectFolderButton = new JButton());
         selectFolderButton.setText("...");
+        // It looks better when the width is set to height, so.....
         selectFolderButton.setPreferredSize(new Dimension(installLocation.getPreferredSize().height, installLocation.getPreferredSize().height));
         selectFolderButton.addActionListener(e -> InstallerGUI.selectInstallLocation(() -> installLocation.getText(), s -> installLocation.setText(s)));
 
@@ -76,7 +78,7 @@ public class FabricInstallerHelper extends InstallerHelper {
                 buttonFabric = new JButton(Main.BUNDLE.getString("installer.button.fabric")));
         buttonFabric.addActionListener(e -> {
             try {
-                Process process = Runtime.getRuntime().exec("java -jar cache/" + getJarFile().getName());
+                Process process = Runtime.getRuntime().exec("java -jar cache/" + Objects.requireNonNull(getJarFile()).getName());
                 while(process.isAlive()) {
                     buttonFabric.setEnabled(false);
                 }
@@ -91,8 +93,8 @@ public class FabricInstallerHelper extends InstallerHelper {
 
     @Override
     public void launch() throws IOException {
-
         String stringGameVersion = (String) gameVersionComboBox.getSelectedItem();
+        assert stringGameVersion != null;
         FabricVersionHandler.GameVersion gameVersion = FabricVersionHandler.identifyGameVersion(stringGameVersion);
         if(gameVersion == null) return;
 
@@ -104,7 +106,7 @@ public class FabricInstallerHelper extends InstallerHelper {
         }
 
         System.out.println("Installing Fabric " + gameVersion.getVersion() + " (" + gameVersion.getCodeName() + ")");
-        String[] cmd2 = new String[]{"java", "-jar", "cache/" + getJarFile().getName(), "client", "-dir" + "\"" + mcPath.toAbsolutePath() + "\"", "-mcversion", gameVersion.codeName};
+        String[] cmd2 = new String[]{"java", "-jar", "cache/" + Objects.requireNonNull(getJarFile()).getName(), "client", "-dir" + "\"" + mcPath.toAbsolutePath() + "\"", "-mcversion", gameVersion.codeName};
 
 
         try {
@@ -153,12 +155,12 @@ public class FabricInstallerHelper extends InstallerHelper {
             return new File(cacheDir.toFile(), fileName);
         }
 
-        if(cacheDir.toFile().listFiles().length == 0) {
+        if(Objects.requireNonNull(cacheDir.toFile().listFiles()).length == 0) {
             Files.delete(cacheDir);
             return getJarFile();
         }
 
-        for(File file : cacheDir.toFile().listFiles()) {
+        for(File file : Objects.requireNonNull(cacheDir.toFile().listFiles())) {
             if(file.getName().equals(fileName)) {
                 return file;
             } else {

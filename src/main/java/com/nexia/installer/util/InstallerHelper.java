@@ -42,6 +42,7 @@ public class InstallerHelper {
                 installLocation = new JTextField(20),
                 selectFolderButton = new JButton());
         selectFolderButton.setText("...");
+        // It looks better when the width is set to height, so.....
         selectFolderButton.setPreferredSize(new Dimension(installLocation.getPreferredSize().height, installLocation.getPreferredSize().height));
         selectFolderButton.addActionListener(e -> InstallerGUI.selectInstallLocation(() -> installLocation.getText(), s -> installLocation.setText(s)));
 
@@ -109,8 +110,8 @@ public class InstallerHelper {
     }
 
     public void launch() throws IOException {
-
         String stringGameVersion = (String) gameVersionComboBox.getSelectedItem();
+        assert stringGameVersion != null;
         VersionHandler.GameVersion gameVersion = VersionHandler.identifyGameVersion(stringGameVersion);
         if(gameVersion == null) return;
 
