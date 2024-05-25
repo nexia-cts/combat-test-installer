@@ -38,13 +38,12 @@ public class Main {
 
         os = OS.LINUX;
 
-        if(System.getProperty("os.name").startsWith("Windows")){
+        if (System.getProperty("os.name").contains("win")) {
             os = OS.WINDOWS;
             System.setProperty("javax.net.ssl.trustStoreType", "WINDOWS-ROOT");
-        }
-
-        if(System.getProperty("os.name").startsWith("mac"))
+        } else if (System.getProperty("os.name").contains("mac")) {
             os = OS.MAC;
+        }
 
         icon = Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png"));
         InstallerGUI.load();
