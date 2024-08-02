@@ -2,7 +2,10 @@ package com.nexia.installer.util.fabric;
 
 import com.nexia.installer.InstallerGUI;
 import com.nexia.installer.Main;
-import com.nexia.installer.util.*;
+import com.nexia.installer.util.HttpAPI;
+import com.nexia.installer.util.InstallerHelper;
+import com.nexia.installer.util.InstallerUtils;
+import com.nexia.installer.util.Utils;
 import mjson.Json;
 
 import javax.swing.*;
@@ -18,7 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.util.List;
 import java.util.Objects;
 
 public class FabricInstallerHelper extends InstallerHelper {
@@ -50,7 +52,7 @@ public class FabricInstallerHelper extends InstallerHelper {
         }
 
         addRow(panel, c, "installer.prompt.select.location",
-                installLocation = new JTextField(20),
+                installLocation = new JTextField(21),
                 selectFolderButton = new JButton());
         selectFolderButton.setText("...");
         // It looks better when the width is set to height, so.....
@@ -68,9 +70,8 @@ public class FabricInstallerHelper extends InstallerHelper {
             buttonInstall.setEnabled(false);
             try {
                 launch();
-            } catch (IOException | RuntimeException ex) {
-                InstallerUtils.showError(ex.getMessage());
-                ex.printStackTrace();
+            } catch (Exception ex) {
+                InstallerUtils.showError(ex);
             }
         });
 
@@ -129,13 +130,13 @@ public class FabricInstallerHelper extends InstallerHelper {
             if (successBufferedInputStream.available() == 0) hasError = true;
 
             if(hasError) {
-                InstallerUtils.showError(Main.BUNDLE.getString("installer.prompt.install.error"));
+                InstallerUtils.showError("The Fabric installer has had an unknown error.");
             } else {
                 this.showDone(gameVersion);
             }
 
-        } catch (Exception ignored) {
-            InstallerUtils.showError(Main.BUNDLE.getString("installer.prompt.install.error"));
+        } catch (Exception e) {
+            InstallerUtils.showError(e);
         }
 
         buttonInstall.setEnabled(true);

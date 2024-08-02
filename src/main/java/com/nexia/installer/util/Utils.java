@@ -69,8 +69,7 @@ public class Utils {
                 t.addSuppressed(t2);
             }
 
-            InstallerUtils.showError(t.getMessage());
-            t.printStackTrace();
+            InstallerUtils.showError(t);
         }
     }
 

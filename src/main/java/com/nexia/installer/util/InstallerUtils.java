@@ -7,10 +7,7 @@ import com.nexia.installer.game.VersionHandler;
 import javax.swing.*;
 import java.io.File;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -31,10 +28,10 @@ public class InstallerUtils {
 
                 if (Main.os.equals(Main.OS.LINUX) && !Files.exists(dir)) {
                     // https://github.com/flathub/com.mojang.Minecraft
-                    final Path flatpack = homeDir.resolve(".var").resolve("app").resolve("com.mojang.Minecraft").resolve(".minecraft");
+                    final Path flatpak = homeDir.resolve(".var").resolve("app").resolve("com.mojang.Minecraft").resolve(".minecraft");
 
-                    if (Files.exists(flatpack)) {
-                        dir = flatpack;
+                    if (Files.exists(flatpak)) {
+                        dir = flatpak;
                     }
                 }
             }
@@ -92,6 +89,7 @@ public class InstallerUtils {
 
                Files.copy(aProfileJson, profileJson, StandardCopyOption.REPLACE_EXISTING);
 
+               //System.out.println(Utils.sha1String(zipFile.toPath()).equalsIgnoreCase(gameVersion.getDownload().sha1));
 
                aProfileJson.toFile().delete();
                aProfileDir.toFile().delete();
@@ -106,7 +104,7 @@ public class InstallerUtils {
                }
                showDone(gameVersion);
            } catch (Exception e) {
-               e.printStackTrace();
+               InstallerUtils.showError(e);
            } finally {
                InstallerHelper.buttonInstall.setEnabled(true);
            }
@@ -133,10 +131,15 @@ public class InstallerUtils {
         return result == JOptionPane.YES_OPTION ? ProfileInstaller.LauncherType.MICROSOFT_STORE : ProfileInstaller.LauncherType.WIN32;
     }
 
+    public static void showError(Throwable throwable) {
+        throwable.printStackTrace();
+        showError(throwable.getClass().getSimpleName() + ": " + throwable.getMessage());
+    }
+
     public static void showError(String error) {
         Object[] options = {"Restart Program"};
         int result = JOptionPane.showOptionDialog(null,
-                error,
+                Main.BUNDLE.getString("installer.prompt.install.error") + "\n\n" + error,
                 Main.BUNDLE.getString("installer.title"),
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.ERROR_MESSAGE,
