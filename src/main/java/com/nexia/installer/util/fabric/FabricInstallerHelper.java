@@ -52,7 +52,7 @@ public class FabricInstallerHelper extends InstallerHelper {
         }
 
         addRow(panel, c, "installer.prompt.select.location",
-                installLocation = new JTextField(21),
+                installLocation = new JTextField(23),
                 selectFolderButton = new JButton());
         selectFolderButton.setText("...");
         // It looks better when the width is set to height, so.....
