@@ -6,6 +6,7 @@ import com.nexia.installer.game.VersionHandler;
 
 import javax.swing.*;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.*;
 import java.text.MessageFormat;
@@ -40,6 +41,40 @@ public class InstallerUtils {
         return dir.toAbsolutePath().normalize();
     }
 
+    public static void downloadVanilla(Path mcDir, VersionHandler.GameVersion gameVersion) throws IOException {
+        String alternativeCodeName = gameVersion.getCodeName().replaceAll("\\.", "_");
+
+        System.out.println("Installing " + gameVersion.getVersion() + " (" + gameVersion.getCodeName() + ")");
+
+        Path versionsDir = mcDir.resolve("versions");
+        if(!Files.exists(versionsDir)) Files.createDirectories(versionsDir);
+
+        Path profileDir = versionsDir.resolve(gameVersion.getCodeName());
+        Path profileJson = profileDir.resolve(gameVersion.getCodeName() + ".json");
+
+        Path aProfileDir = versionsDir.resolve(alternativeCodeName);
+        Path aProfileJson = aProfileDir.resolve(alternativeCodeName + ".json");
+
+        if(!Files.exists(profileDir)) Files.createDirectory(profileDir);
+        if(!Files.exists(profileJson)) Files.createFile(profileJson);
+
+        if(!Files.exists(aProfileDir)) Files.createDirectory(aProfileDir);
+        if(!Files.exists(aProfileJson)) Files.createFile(aProfileJson);
+
+        File zipFile = new File(versionsDir + "/" + gameVersion.getCodeName() + ".zip");
+
+        Utils.downloadFile(URI.create(gameVersion.getDownload().url).toURL(), zipFile.toPath());
+        Utils.extractZip(zipFile.toPath(), versionsDir);
+
+        Files.copy(aProfileJson, profileJson, StandardCopyOption.REPLACE_EXISTING);
+
+        //System.out.println(Utils.sha1String(zipFile.toPath()).equalsIgnoreCase(gameVersion.getDownload().sha1));
+
+        aProfileJson.toFile().delete();
+        aProfileDir.toFile().delete();
+        zipFile.delete();
+    }
+
     public static void install(Path mcDir, VersionHandler.GameVersion gameVersion) {
         if(mcDir == null || gameVersion == null) return;
 
@@ -65,35 +100,7 @@ public class InstallerUtils {
                    }
                }
 
-               String alternativeCodeName = gameVersion.getCodeName().replaceAll("\\.", "_");
-
-               System.out.println("Installing " + gameVersion.getVersion() + " (" + gameVersion.getCodeName() + ")");
-
-               Path versionsDir = mcDir.resolve("versions");
-               Path profileDir = versionsDir.resolve(gameVersion.getCodeName());
-               Path profileJson = profileDir.resolve(gameVersion.getCodeName() + ".json");
-
-               Path aProfileDir = versionsDir.resolve(alternativeCodeName);
-               Path aProfileJson = aProfileDir.resolve(alternativeCodeName + ".json");
-
-               if(!Files.exists(profileDir)) Files.createDirectory(profileDir);
-               if(!Files.exists(profileJson)) Files.createFile(profileJson);
-
-               if(!Files.exists(aProfileDir)) Files.createDirectory(aProfileDir);
-               if(!Files.exists(aProfileJson)) Files.createFile(aProfileJson);
-
-               File zipFile = new File(versionsDir + "/" + gameVersion.getCodeName() + ".zip");
-
-               Utils.downloadFile(URI.create(gameVersion.getDownload().url).toURL(), zipFile.toPath());
-               Utils.extractZip(zipFile.toPath(), versionsDir);
-
-               Files.copy(aProfileJson, profileJson, StandardCopyOption.REPLACE_EXISTING);
-
-               //System.out.println(Utils.sha1String(zipFile.toPath()).equalsIgnoreCase(gameVersion.getDownload().sha1));
-
-               aProfileJson.toFile().delete();
-               aProfileDir.toFile().delete();
-               zipFile.delete();
+               downloadVanilla(mcDir, gameVersion);
 
                if (InstallerHelper.createProfile.isSelected()) {
                    if (launcherType == null) {

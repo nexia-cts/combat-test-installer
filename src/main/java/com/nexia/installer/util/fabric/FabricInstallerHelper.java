@@ -2,6 +2,7 @@ package com.nexia.installer.util.fabric;
 
 import com.nexia.installer.InstallerGUI;
 import com.nexia.installer.Main;
+import com.nexia.installer.game.VersionHandler;
 import com.nexia.installer.util.HttpAPI;
 import com.nexia.installer.util.InstallerHelper;
 import com.nexia.installer.util.InstallerUtils;
@@ -99,47 +100,58 @@ public class FabricInstallerHelper extends InstallerHelper {
         FabricVersionHandler.GameVersion gameVersion = FabricVersionHandler.identifyGameVersion(stringGameVersion);
         if(gameVersion == null) return;
 
-
         Path mcPath = Paths.get(installLocation.getText());
 
         if (!Files.exists(mcPath)) {
             throw new RuntimeException(Main.BUNDLE.getString("installer.exception.no.launcher.directory"));
         }
 
+        VersionHandler.GameVersion vanillaGameVersion = VersionHandler.identifyGameVersion(stringGameVersion);
+        if(vanillaGameVersion != null) {
+            // Fix not being able to download fabric from the launcher
+            Path versionsPath = mcPath.resolve("versions").resolve(vanillaGameVersion.getCodeName());
+            if(!Files.exists(versionsPath)) {
+                try {
+                    InstallerUtils.downloadVanilla(mcPath, vanillaGameVersion);
+                } catch (Exception ignored) { }
+            }
+        }
+
         System.out.println("Installing Fabric " + gameVersion.getVersion() + " (" + gameVersion.getCodeName() + ")");
         String[] cmd2 = new String[]{"java", "-jar", "cache/" + Objects.requireNonNull(getJarFile()).getName(), "client", "-dir" + "\"" + mcPath.toAbsolutePath() + "\"", "-mcversion", gameVersion.codeName};
 
+        new Thread(() -> {
+            try {
+                Process process = Runtime.getRuntime().exec(cmd2);
 
-        try {
-            Process process = Runtime.getRuntime().exec(cmd2);
+                BufferedInputStream successBufferedInputStream = new BufferedInputStream(process.getInputStream());
+                BufferedInputStream errorBufferedInputStream = new BufferedInputStream(process.getErrorStream());
+                synchronized (process) {
+                    process.waitFor();
+                }
 
-            BufferedInputStream successBufferedInputStream = new BufferedInputStream(process.getInputStream());
-            BufferedInputStream errorBufferedInputStream = new BufferedInputStream(process.getErrorStream());
-            synchronized (process) {
-                process.waitFor();
+                boolean hasError = false;
+
+                if (errorBufferedInputStream.available() != 0) {
+                    errorBufferedInputStream.close();
+                    hasError = true;
+                }
+
+                if (process.exitValue() != 0) hasError = true;
+                if (successBufferedInputStream.available() == 0) hasError = true;
+
+                if(hasError) {
+                    InstallerUtils.showError("The Fabric Installer has had an unknown error.");
+                } else {
+                    this.showDone(gameVersion);
+                }
+
+            } catch (Exception e) {
+                InstallerUtils.showError(e);
+            } finally {
+                buttonInstall.setEnabled(true);
             }
-
-            boolean hasError = false;
-
-            if (errorBufferedInputStream.available() != 0) {
-                errorBufferedInputStream.close();
-                hasError = true;
-            }
-
-            if (process.exitValue() != 0) hasError = true;
-            if (successBufferedInputStream.available() == 0) hasError = true;
-
-            if(hasError) {
-                InstallerUtils.showError("The Fabric installer has had an unknown error.");
-            } else {
-                this.showDone(gameVersion);
-            }
-
-        } catch (Exception e) {
-            InstallerUtils.showError(e);
-        }
-
-        buttonInstall.setEnabled(true);
+        }).start();
     }
 
 
